@@ -24,7 +24,10 @@ void Reader::run()
         QByteArray chunk = file.read(4000);
         while (chunk.size() < 4000) {
             file.seek(0);
-            chunk += file.read(4000 - chunk.size());
+            QByteArray more = file.read(4000 - chunk.size());
+            if (more.isEmpty())
+                return;
+            chunk += more;
         }
 
         QVector<QPointF> points;
