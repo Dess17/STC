@@ -5,3 +5,4 @@ enable_testing()
 
 add_subdirectory(sniffer)
 add_subdirectory(constellation)
+add_subdirectory(rollercoaster)
