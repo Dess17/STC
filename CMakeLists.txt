@@ -4,3 +4,4 @@ project(STC CXX)
 enable_testing()
 
 add_subdirectory(sniffer)
+add_subdirectory(constellation)
