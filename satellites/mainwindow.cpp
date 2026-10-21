@@ -51,7 +51,13 @@ void MainWindow::openFile()
 
 void MainWindow::loadUrl()
 {
-    QNetworkRequest request(QUrl(urlEdit->text().trimmed()));
+    QUrl url(urlEdit->text().trimmed());
+    if (!url.isValid() || url.scheme().isEmpty() || url.host().isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Некорректная ссылка");
+        return;
+    }
+
+    QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     QNetworkReply *reply = network.get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
