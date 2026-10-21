@@ -69,17 +69,37 @@ QVector<Satellite> parseTle(const QString &text, QString &error)
 
         const QString &line1 = lines[i];
         const QString &line2 = lines[i + 1];
+        if (line1.mid(2, 5) != line2.mid(2, 5)) {
+            error = QString("строка %1: номер спутника не совпадает с предыдущей строкой").arg(numbers[i + 1]);
+            return {};
+        }
         if (s.name.isEmpty())
             s.name = line1.mid(2, 5).trimmed();
 
+        bool ok = true;
         QString launch = line1.mid(9, 2).trimmed();
         if (!launch.isEmpty())
-            s.launchYear = fullYear(launch.toInt());
+            s.launchYear = fullYear(launch.toUInt(&ok));
+        if (!ok) {
+            error = QString("строка %1: неверный год запуска").arg(numbers[i]);
+            return {};
+        }
 
-        int epochYear = fullYear(line1.mid(18, 2).toInt());
-        double epochDay = line1.mid(20, 12).toDouble();
+        bool yearOk = false;
+        bool dayOk = false;
+        int epochYear = fullYear(line1.mid(18, 2).toUInt(&yearOk));
+        double epochDay = line1.mid(20, 12).toDouble(&dayOk);
+        if (!yearOk || !dayOk || epochDay < 1 || epochDay >= 367) {
+            error = QString("строка %1: неверная дата данных").arg(numbers[i]);
+            return {};
+        }
         s.epoch = QDateTime(QDate(epochYear, 1, 1), QTime(0, 0), Qt::UTC).addMSecs(qRound64((epochDay - 1) * 86400000));
-        s.inclination = line2.mid(8, 8).toDouble();
+
+        s.inclination = line2.mid(8, 8).toDouble(&ok);
+        if (!ok || s.inclination < 0 || s.inclination > 180) {
+            error = QString("строка %1: неверное наклонение").arg(numbers[i + 1]);
+            return {};
+        }
 
         satellites << s;
         i += 2;
