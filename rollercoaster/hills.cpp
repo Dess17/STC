@@ -20,6 +20,8 @@ std::vector<float> readFile(const std::string &fileName)
         const unsigned char *b = &bytes[i * 4];
         uint32_t value = b[0] | b[1] << 8 | b[2] << 16 | uint32_t(b[3]) << 24;
         std::memcpy(&data[i], &value, 4);
+        if (!std::isfinite(data[i]))
+            throw std::runtime_error("bad value at " + std::to_string(i) + " in " + fileName);
     }
     return data;
 }
